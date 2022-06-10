@@ -18,41 +18,6 @@ public class H2O {
     public H2O() {
     }
 
-    public static void main(String[] args) {
-        H2O h2o = new H2O();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    h2o.hydrogen(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.print("H");
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    h2o.oxygen(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.print("O");
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 
     public void hydrogen(Runnable releaseHydrogen) throws InterruptedException {
         lock.lock();
