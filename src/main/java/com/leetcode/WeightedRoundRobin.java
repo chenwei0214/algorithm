@@ -34,10 +34,36 @@ public class WeightedRoundRobin {
                     ? node.invoker : null;
         }
         int totalWeight = 0;
+        Node nodeOfMaxWeight = nodes.get(0);
         for (Node node : nodes) {
             totalWeight += node.effectiveWeight;
             node.currentWeight += node.effectiveWeight;
-            
+            if (nodeOfMaxWeight == null) {
+                nodeOfMaxWeight = node;
+            } else {
+                nodeOfMaxWeight = nodeOfMaxWeight.compareTo(node) > 0 ? nodeOfMaxWeight : node;
+            }
+        }
+        nodeOfMaxWeight.currentWeight -= totalWeight;
+        return nodeOfMaxWeight.invoker;
+    }
+
+    public void onInvokeSuccess(Invoker invoker) {
+        if (checkNodes()) {
+            nodes.stream()
+                    .filter(node -> invoker.getId().equals(node.invoker.getId()))
+                    .findFirst()
+                    .ifPresent(Node::onInvokeSuccess);
+        }
+    }
+
+    public void onInvokeFail(Invoker invoker) {
+        if (checkNodes()) {
+            nodes.stream()
+                    .filter(node -> invoker.getId().equals(node.invoker.getId()))
+                    .findFirst()
+                    .ifPresent(Node::onInvokeFail);
+
         }
     }
 
@@ -67,6 +93,15 @@ public class WeightedRoundRobin {
         @Override
         public int compareTo(Node o) {
             return currentWeight >= o.currentWeight ? 1 : 0;
+        }
+
+        public void onInvokeSuccess() {
+            if (effectiveWeight < this.weight)
+                effectiveWeight++;
+        }
+
+        public void onInvokeFail() {
+            effectiveWeight--;
         }
 
         public Invoker getInvoker() {
